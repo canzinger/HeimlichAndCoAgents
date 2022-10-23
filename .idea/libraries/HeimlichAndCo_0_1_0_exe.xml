@@ -1,7 +1,7 @@
 <component name="libraryTable">
   <library name="HeimlichAndCo-0.1.0-exe">
     <CLASSES>
-      <root url="jar://$PROJECT_DIR$/HeimlichAndCo-0.1.0-exe.jar!/" />
+      <root url="jar://$PROJECT_DIR$/libs/HeimlichAndCo-0.1.0-exe.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES />
