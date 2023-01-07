@@ -7,8 +7,8 @@ version '1.0'
 
 sourceCompatibility = 1.11
 
-def agent_name = 'HeimlichAndCoRandomAgent'
-//def agent_name = 'HeimlichAndCoAlphaBetaAgent'
+//def agent_name = 'HeimlichAndCoRandomAgent'
+def agent_name = 'HeimlichAndCoDepthSearchAgent'
 //def agent_name = 'HeimlichAndCoMCTSAgent'
 
 repositories {
@@ -18,7 +18,7 @@ repositories {
 dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
-    implementation files('libs/HeimlichAndCo-0.1.0-exe.jar')
+    implementation files('libs/HeimlichAndCo-0.2.0.jar')
     implementation files('libs/sge-1.0.2-exe.jar')
 }
 
@@ -33,5 +33,5 @@ jar {
         attributes 'Agent-Name': agent_name
     }
     archivesBaseName = agent_name
-    includes = [agent_name+'/*', 'util/*']
+    includes = [agent_name+'/*']
 }
