@@ -20,24 +20,4 @@ public class HeimlichAndCoRandomAgent extends AbstractGameAgent<HeimlichAndCo, H
         HeimlichAndCoAction[] actions = heimlichAndCo.getPossibleActions().toArray(new HeimlichAndCoAction[0]);
         return actions[(int) (Math.random() * actions.length)];
     }
-
-    @Override
-    public void tearDown() {
-        super.tearDown();
-    }
-
-    @Override
-    public void ponderStart() {
-        super.ponderStart();
-    }
-
-    @Override
-    public void ponderStop() {
-        super.ponderStop();
-    }
-
-    @Override
-    public void destroy() {
-        super.destroy();
-    }
 }
