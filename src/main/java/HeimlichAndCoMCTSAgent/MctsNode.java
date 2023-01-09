@@ -17,6 +17,12 @@ public class MctsNode {
      */
     private static final double C = Math.sqrt(2);
 
+    /**
+     * Saves the player id of the player for which the tree is build. I.e. the player for which the best action should
+     * be chosen in the end.
+     */
+    private static int playerId;
+
     private final Comparator<HeimlichAndCoAction> ACTION_COMPARATOR_UCT = Comparator.comparingDouble(this::calculateUCT);
     private final Comparator<HeimlichAndCoAction> ACTION_COMPARATOR_Q_s_a = Comparator.comparingDouble(this::calculateQ_s_a_OfChild);
 
@@ -47,6 +53,10 @@ public class MctsNode {
      * parent of this node; null for root node
      */
     private final MctsNode parent;
+
+    public static void setPlayerId(int playerId) {
+        MctsNode.playerId = playerId;
+    }
 
     public MctsNode(int wins, int playouts, HeimlichAndCo game, MctsNode parent) {
         this(game, parent);
@@ -123,7 +133,7 @@ public class MctsNode {
      * Does backpropagation starting from the current node.
      * Therefore, always increases playouts and increases wins depending on win.
      *
-     * @param win indicating whether the game was one or not (1 on win, 0 on loss).
+     * @param win indicating whether the game was won or not (1 on win, 0 on loss).
      */
     public void backpropagation(int win) {
         if (win != 0 && win != 1) {
@@ -175,7 +185,16 @@ public class MctsNode {
             if (child.playouts == 0 || this.playouts == 0) { //this should never happen
                 throw new RuntimeException("Illegal 0 value in calculateUCT");
             }
-            double Q_s_a = ((double) child.wins / child.playouts);
+            double Q_s_a;
+            if (this.game.getCurrentPlayer() == MctsNode.playerId) {
+                Q_s_a = ((double) child.wins / child.playouts);
+            } else {
+                //if the current player is not the player we are maximizing for, we have to 'invert' the wins, as the
+                //other players of course do not want 'our' player to win. Meaning, they of course don't take the action
+                //which benefits 'our' player
+                Q_s_a = ((double) (child.playouts - child.wins) / child.playouts);
+            }
+
             double N_s = this.playouts;
             double N_s_a = child.playouts;
             return Q_s_a + C * Math.sqrt(Math.log(N_s) / N_s_a);

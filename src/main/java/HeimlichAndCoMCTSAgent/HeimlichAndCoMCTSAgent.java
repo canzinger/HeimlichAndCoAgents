@@ -29,7 +29,7 @@ public class HeimlichAndCoMCTSAgent extends AbstractGameAgent<HeimlichAndCo, Hei
      * False means that when first visiting the "die roll node", a random outcome will be chosen, and that is the only
      * outcome that is considered in that tree.
      */
-    private final boolean SIMULATE_ALL_DICE_OUTCOMES = true;
+    private final boolean SIMULATE_ALL_DIE_OUTCOMES = true;
 
     public HeimlichAndCoMCTSAgent(Logger logger) {
         super(logger);
@@ -48,15 +48,13 @@ public class HeimlichAndCoMCTSAgent extends AbstractGameAgent<HeimlichAndCo, Hei
         try {
             addInformationToGame(game);
 
-            if (SIMULATE_ALL_DICE_OUTCOMES) {
+            if (SIMULATE_ALL_DIE_OUTCOMES) {
                 game.setAllowCustomDieRolls(true);
             }
-
-
-            //first create a new tree
+            MctsNode.setPlayerId(this.playerId);
             MctsNode tree = new MctsNode(0,0, game, null);
             while(!this.shouldStopComputation()) {
-                Pair<MctsNode, HeimlichAndCoAction> selectionPair = mctsSelection(tree, SIMULATE_ALL_DICE_OUTCOMES);
+                Pair<MctsNode, HeimlichAndCoAction> selectionPair = mctsSelection(tree, SIMULATE_ALL_DIE_OUTCOMES);
                 MctsNode newNode = mctsExpansion(selectionPair.getA(), selectionPair.getB());
                 int win = mctsSimulation(newNode);
                 mctsBackpropagation(newNode, win);
@@ -85,6 +83,13 @@ public class HeimlichAndCoMCTSAgent extends AbstractGameAgent<HeimlichAndCo, Hei
         return node.expansion(action);
     }
 
+    /**
+     * Does the simulation step of MCTS. This function is implemented here and not in the MctsNode as that makes it
+     * easier to handle how much time there is (left) for computation before timing out.
+     *
+     * @param node from where simulation should take place
+     * @return 1 or 0, depending on whether the agent belonging to the player of this agent wins
+     */
     private int mctsSimulation(MctsNode node) {
         log.deb("MctsAgent: In Simulation\n");
         HeimlichAndCo game = node.getGame();
@@ -120,6 +125,12 @@ public class HeimlichAndCoMCTSAgent extends AbstractGameAgent<HeimlichAndCo, Hei
         node.backpropagation(win);
     }
 
+    /**
+     * Adds information that was removed by the game (i.e. hidden information).
+     * Therefore, adds entries to the map which maps agents to players and entries to the map mapping the cards of players.
+     * The agents are randomly assigned to players. And players are assumed to have no cards.
+     * @param game
+     */
     private void addInformationToGame(HeimlichAndCo game) {
         //we need to determinize the tree, i.e. add information that is secret that the game hid from us
         //here we just guess
