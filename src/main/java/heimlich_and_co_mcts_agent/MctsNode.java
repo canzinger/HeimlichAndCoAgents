@@ -23,8 +23,8 @@ public class MctsNode {
      */
     private static int playerId;
 
-    private final Comparator<HeimlichAndCoAction> ACTION_COMPARATOR_UCT = Comparator.comparingDouble(this::calculateUCT);
-    private final Comparator<HeimlichAndCoAction> ACTION_COMPARATOR_Q_s_a = Comparator.comparingDouble(this::calculateQ_s_a_OfChild);
+    private final Comparator<HeimlichAndCoAction> actionComparatorUct = Comparator.comparingDouble(this::calculateUCT);
+    private final Comparator<HeimlichAndCoAction> actionComparatorQsa = Comparator.comparingDouble(this::calculateQsaOfChild);
 
     /**
      * saves how many wins were achieved from this node
@@ -54,6 +54,8 @@ public class MctsNode {
      */
     private final MctsNode parent;
 
+    private final Random random;
+
     public static void setPlayerId(int playerId) {
         MctsNode.playerId = playerId;
     }
@@ -73,6 +75,7 @@ public class MctsNode {
             this.depth = 0;
         }
         this.children = new HashMap<>();
+        this.random = new Random();
     }
 
     public HeimlichAndCo getGame() {
@@ -93,10 +96,10 @@ public class MctsNode {
         HeimlichAndCoAction selectedAction;
         if (simulateAllDiceOutcomes && game.getCurrentPhase() == HeimlichAndCoPhase.DIE_ROLL_PHASE) {
             possibleActions.remove(HeimlichAndCoDieRollAction.getRandomRollAction());
-            selectedAction = possibleActions.toArray(new HeimlichAndCoAction[1])[(int)(possibleActions.size() * Math.random())];
+            selectedAction = possibleActions.toArray(new HeimlichAndCoAction[1])[random.nextInt(possibleActions.size())];
         } else {
-            List<HeimlichAndCoAction> maximumValuedActions = getMaximumValuedActions(possibleActions, this.ACTION_COMPARATOR_UCT);
-            selectedAction = maximumValuedActions.get((int)(Math.random() * maximumValuedActions.size()));
+            List<HeimlichAndCoAction> maximumValuedActions = getMaximumValuedActions(possibleActions, this.actionComparatorUct);
+            selectedAction = maximumValuedActions.get(random.nextInt(maximumValuedActions.size()));
         }
 
         if (this.children.containsKey(selectedAction)) {
@@ -155,10 +158,10 @@ public class MctsNode {
     public ImmutablePair<MctsNode, HeimlichAndCoAction> getBestChild() {
         Set<HeimlichAndCoAction> possibleActions = children.keySet();
         if (possibleActions.isEmpty()) {
-            throw new RuntimeException("Could not find best child, because there are no children.");
+            throw new IllegalStateException("Could not find best child, because there are no children.");
         }
-        List<HeimlichAndCoAction> maximumValuedActions = getMaximumValuedActions(possibleActions, this.ACTION_COMPARATOR_Q_s_a);
-        HeimlichAndCoAction selectedAction = maximumValuedActions.get((int) (maximumValuedActions.size() * Math.random()));
+        List<HeimlichAndCoAction> maximumValuedActions = getMaximumValuedActions(possibleActions, this.actionComparatorQsa);
+        HeimlichAndCoAction selectedAction = maximumValuedActions.get(random.nextInt(maximumValuedActions.size()));
         return new ImmutablePair<>(this.children.get(selectedAction), selectedAction);
     }
 
@@ -183,21 +186,21 @@ public class MctsNode {
         if(this.children.containsKey(action)) {
             MctsNode child = this.children.get(action);
             if (child.playouts == 0 || this.playouts == 0) { //this should never happen
-                throw new RuntimeException("Illegal 0 value in calculateUCT");
+                throw new IllegalStateException("Illegal 0 value in calculateUCT");
             }
-            double Q_s_a;
+            double qSA;
             if (this.game.getCurrentPlayer() == MctsNode.playerId) {
-                Q_s_a = ((double) child.wins / child.playouts);
+                qSA = ((double) child.wins / child.playouts);
             } else {
                 //if the current player is not the player we are maximizing for, we have to 'invert' the wins, as the
                 //other players of course do not want 'our' player to win. Meaning, they of course don't take the action
                 //which benefits 'our' player
-                Q_s_a = ((double) (child.playouts - child.wins) / child.playouts);
+                qSA = ((double) (child.playouts - child.wins) / child.playouts);
             }
 
-            double N_s = this.playouts;
-            double N_s_a = child.playouts;
-            return Q_s_a + C * Math.sqrt(Math.log(N_s) / N_s_a);
+            double nS = this.playouts;
+            double nSA = child.playouts;
+            return qSA + C * Math.sqrt(Math.log(nS) / nSA);
         }
         return Double.MAX_VALUE;
     }
@@ -211,7 +214,7 @@ public class MctsNode {
      * @param action for which to calculate the percentage
      * @return expected percentage of wins when playing action in the current state
      */
-    public double calculateQ_s_a_OfChild(HeimlichAndCoAction action) {
+    public double calculateQsaOfChild(HeimlichAndCoAction action) {
         if (!this.children.containsKey(action)) {
             throw new IllegalArgumentException("Action is not contained in children");
         }

@@ -12,7 +12,7 @@ public class DepthSearchNode {
      * Saves how many nodes were created.
      * For info/statistics purposes
      */
-    public static int totalNodeCount;
+    private static int totalNodeCount;
 
     /**
      * Saves all children. The keys are the possible actions in the current game state and the values are the resulting
@@ -42,6 +42,14 @@ public class DepthSearchNode {
         totalNodeCount++;
     }
 
+    public static void setTotalNodeCount(int totalNodeCount) {
+        DepthSearchNode.totalNodeCount = totalNodeCount;
+    }
+
+    public static int getTotalNodeCount() {
+        return totalNodeCount;
+    }
+
     /**
      * Expands the current node until the termination depth is reached.
      * Expands the current node by adding all possible child nodes and then calling expand() recursively.
@@ -53,7 +61,7 @@ public class DepthSearchNode {
             return;
         }
         if (this.depth > terminationDepth) {
-            throw new RuntimeException("Depth of node is too large.");
+            throw new IllegalStateException("Depth of node is too large.");
         }
         Set<HeimlichAndCoAction> possibleActions = game.getPossibleActions();
         for(HeimlichAndCoAction action : possibleActions) {
@@ -118,11 +126,11 @@ public class DepthSearchNode {
 
         //get the agent with the highest score that is not the agent of the given player
         int maxScore = Integer.MIN_VALUE;
-        for(Agent agent : scores.keySet()) {
-            if (agent == game.getPlayersToAgentsMap().get(maximizingPlayer)) {
+        for(Map.Entry<Agent, Integer> entry: scores.entrySet()) {
+            if (entry.getKey() == game.getPlayersToAgentsMap().get(maximizingPlayer)) {
                 continue;
             }
-            maxScore= Integer.max(maxScore, scores.get(agent));
+            maxScore = Integer.max(maxScore, entry.getValue());
         }
 
         return playerScore - maxScore;

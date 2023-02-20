@@ -16,7 +16,7 @@ public class HeimlichAndCoDepthSearchAgent extends AbstractGameAgent<HeimlichAnd
     /**
      * Determines the depth the tree will be expanded to during the expand() method.
      */
-    private final int TERMINATION_DEPTH = 3;
+    private static final int TERMINATION_DEPTH = 3;
 
     public HeimlichAndCoDepthSearchAgent(Logger logger) {
         super(logger);
@@ -36,13 +36,13 @@ public class HeimlichAndCoDepthSearchAgent extends AbstractGameAgent<HeimlichAnd
             log.deb("Adding information to game\n");
             addInformationToGame(game);
             log.deb("Creating and expanding Tree\n");
-            DepthSearchNode.totalNodeCount = 0;
+            DepthSearchNode.setTotalNodeCount(0);
             DepthSearchNode root = new DepthSearchNode(game, 0);
             root.expand(TERMINATION_DEPTH);
             log.deb("Evaluating tree\n");
             root.evaluateTree(this.playerId);
             log.deb("Getting max action\n");
-            log.inf("Generated tree with " + DepthSearchNode.totalNodeCount + " total nodes.\n");
+            log.inf("Generated tree with " + DepthSearchNode.getTotalNodeCount() + " total nodes.\n");
             return root.getMaxAction();
         } catch (Exception ex) {
             log.err(ex);
@@ -51,7 +51,7 @@ public class HeimlichAndCoDepthSearchAgent extends AbstractGameAgent<HeimlichAnd
 
         //If an exception is encountered, we play a random action s.t. we do not automatically lose the game
         HeimlichAndCoAction[] actions = game.getPossibleActions().toArray(new HeimlichAndCoAction[0]);
-        return actions[(new Random()).nextInt(actions.length)];
+        return actions[super.random.nextInt(actions.length)];
     }
 
     /**
@@ -69,7 +69,7 @@ public class HeimlichAndCoDepthSearchAgent extends AbstractGameAgent<HeimlichAnd
             if (i == this.playerId) {
                 continue;
             }
-            Agent chosenAgent = unassignedAgents.get((int)(unassignedAgents.size() * Math.random()));
+            Agent chosenAgent = unassignedAgents.get(random.nextInt(unassignedAgents.size()));
             playersToAgentsMap.put(i, chosenAgent);
             unassignedAgents.remove(chosenAgent);
             if (game.isWithCards()) {

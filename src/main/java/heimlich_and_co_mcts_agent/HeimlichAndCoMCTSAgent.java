@@ -17,7 +17,7 @@ public class HeimlichAndCoMCTSAgent extends AbstractGameAgent<HeimlichAndCo, Hei
      * determines the depth of termination for random playouts
      * can be set to -1 to always play out till the game ends
      */
-    private final int TERMINATION_DEPTH = 128;
+    private static final int TERMINATION_DEPTH = 128;
 
     /**
      * Determines the strategy for dealing with the randomness of a die roll.
@@ -29,7 +29,7 @@ public class HeimlichAndCoMCTSAgent extends AbstractGameAgent<HeimlichAndCo, Hei
      * False means that when first visiting the "die roll node", a random outcome will be chosen, and that is the only
      * outcome that is considered in that tree.
      */
-    private final boolean SIMULATE_ALL_DIE_OUTCOMES = true;
+    private static final boolean SIMULATE_ALL_DIE_OUTCOMES = true;
 
     public HeimlichAndCoMCTSAgent(Logger logger) {
         super(logger);
@@ -61,7 +61,7 @@ public class HeimlichAndCoMCTSAgent extends AbstractGameAgent<HeimlichAndCo, Hei
             }
             log.inf("Playouts done from root node: " + tree.getPlayouts() + "\n");
             log.inf("Wins/playouts from selected child node: " + tree.getBestChild().getA().getWins() + "/" + tree.getBestChild().getA().getPlayouts() + "\n");
-            log.inf("Q(s,a) of chosen action: " + tree.calculateQ_s_a_OfChild(tree.getBestChild().getB()) + "\n");
+            log.inf("Q(s,a) of chosen action: " + tree.calculateQsaOfChild(tree.getBestChild().getB()) + "\n");
             return tree.getBestChild().getB();
 
         } catch (Exception ex) {
@@ -70,7 +70,7 @@ public class HeimlichAndCoMCTSAgent extends AbstractGameAgent<HeimlichAndCo, Hei
         }
         //If an exception is encountered, we play a random action s.t. we do not automatically lose the game
         HeimlichAndCoAction[] actions = game.getPossibleActions().toArray(new HeimlichAndCoAction[0]);
-        return actions[(new Random()).nextInt(actions.length)];
+        return actions[super.random.nextInt(actions.length)];
     }
 
     private Pair<MctsNode, HeimlichAndCoAction> mctsSelection(MctsNode node, boolean simulateAllDieOutcomes) {
@@ -100,7 +100,7 @@ public class HeimlichAndCoMCTSAgent extends AbstractGameAgent<HeimlichAndCo, Hei
                 break;
             }
             Set<HeimlichAndCoAction> possibleActions = game.getPossibleActions();
-            HeimlichAndCoAction selectedAction = possibleActions.toArray(new HeimlichAndCoAction[1])[(int)(possibleActions.size() * Math.random())];
+            HeimlichAndCoAction selectedAction = possibleActions.toArray(new HeimlichAndCoAction[1])[super.random.nextInt(possibleActions.size())];
             game.applyAction(selectedAction);
             simulationDepth++;
         }
@@ -142,7 +142,7 @@ public class HeimlichAndCoMCTSAgent extends AbstractGameAgent<HeimlichAndCo, Hei
             if (i == this.playerId) {
                 continue;
             }
-            Agent chosenAgent = unassignedAgents.get((int)(unassignedAgents.size() * Math.random()));
+            Agent chosenAgent = unassignedAgents.get(super.random.nextInt(unassignedAgents.size()));
             playersToAgentsMap.put(i, chosenAgent); //choose a random agent
             unassignedAgents.remove(chosenAgent);
             if (game.isWithCards()) {
