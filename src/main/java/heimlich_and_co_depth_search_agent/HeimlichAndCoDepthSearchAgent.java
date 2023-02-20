@@ -1,11 +1,12 @@
-package HeimlichAndCoDepthSearchAgent;
+package heimlich_and_co_depth_search_agent;
 
-import HeimlichAndCo.Actions.HeimlichAndCoAction;
-import HeimlichAndCo.Enums.Agent;
-import HeimlichAndCo.HeimlichAndCo;
+
 import at.ac.tuwien.ifs.sge.agent.AbstractGameAgent;
 import at.ac.tuwien.ifs.sge.agent.GameAgent;
 import at.ac.tuwien.ifs.sge.engine.Logger;
+import heimlich_and_co.HeimlichAndCo;
+import heimlich_and_co.actions.HeimlichAndCoAction;
+import heimlich_and_co.enums.Agent;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;

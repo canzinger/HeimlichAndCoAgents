@@ -1,10 +1,10 @@
-package HeimlichAndCoRandomAgent;
+package heimlich_and_co_random_agent;
 
-import HeimlichAndCo.Actions.HeimlichAndCoAction;
-import HeimlichAndCo.HeimlichAndCo;
 import at.ac.tuwien.ifs.sge.agent.AbstractGameAgent;
 import at.ac.tuwien.ifs.sge.agent.GameAgent;
 import at.ac.tuwien.ifs.sge.engine.Logger;
+import heimlich_and_co.HeimlichAndCo;
+import heimlich_and_co.actions.HeimlichAndCoAction;
 
 import java.util.concurrent.TimeUnit;
 
@@ -18,6 +18,6 @@ public class HeimlichAndCoRandomAgent extends AbstractGameAgent<HeimlichAndCo, H
     public HeimlichAndCoAction computeNextAction(HeimlichAndCo heimlichAndCo, long l, TimeUnit timeUnit) {
         super.log.inf("Selecting random action");
         HeimlichAndCoAction[] actions = heimlichAndCo.getPossibleActions().toArray(new HeimlichAndCoAction[0]);
-        return actions[(int) (Math.random() * actions.length)];
+        return actions[super.random.nextInt(actions.length)];
     }
 }

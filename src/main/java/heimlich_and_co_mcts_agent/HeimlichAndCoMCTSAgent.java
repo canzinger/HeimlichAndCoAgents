@@ -1,12 +1,12 @@
-package HeimlichAndCoMCTSAgent;
+package heimlich_and_co_mcts_agent;
 
-import HeimlichAndCo.Actions.HeimlichAndCoAction;
-import HeimlichAndCo.Enums.Agent;
-import HeimlichAndCo.HeimlichAndCo;
 import at.ac.tuwien.ifs.sge.agent.AbstractGameAgent;
 import at.ac.tuwien.ifs.sge.agent.GameAgent;
 import at.ac.tuwien.ifs.sge.engine.Logger;
 import at.ac.tuwien.ifs.sge.util.pair.Pair;
+import heimlich_and_co.HeimlichAndCo;
+import heimlich_and_co.actions.HeimlichAndCoAction;
+import heimlich_and_co.enums.Agent;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -129,7 +129,7 @@ public class HeimlichAndCoMCTSAgent extends AbstractGameAgent<HeimlichAndCo, Hei
      * Adds information that was removed by the game (i.e. hidden information).
      * Therefore, adds entries to the map which maps agents to players and entries to the map mapping the cards of players.
      * The agents are randomly assigned to players. And players are assumed to have no cards.
-     * @param game
+     * @param game to add information to
      */
     private void addInformationToGame(HeimlichAndCo game) {
         //we need to determinize the tree, i.e. add information that is secret that the game hid from us

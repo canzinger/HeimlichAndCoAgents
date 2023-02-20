@@ -1,11 +1,11 @@
-package HeimlichAndCoMCTSAgent;
+package heimlich_and_co_mcts_agent;
 
-import HeimlichAndCo.Actions.HeimlichAndCoAction;
-import HeimlichAndCo.Actions.HeimlichAndCoDieRollAction;
-import HeimlichAndCo.Enums.HeimlichAndCoPhase;
-import HeimlichAndCo.HeimlichAndCo;
 import at.ac.tuwien.ifs.sge.util.pair.ImmutablePair;
 import at.ac.tuwien.ifs.sge.util.pair.Pair;
+import heimlich_and_co.HeimlichAndCo;
+import heimlich_and_co.actions.HeimlichAndCoAction;
+import heimlich_and_co.actions.HeimlichAndCoDieRollAction;
+import heimlich_and_co.enums.HeimlichAndCoPhase;
 
 import java.util.*;
 
@@ -91,7 +91,7 @@ public class MctsNode {
             return new ImmutablePair<>(this, null);
         }
         HeimlichAndCoAction selectedAction;
-        if (simulateAllDiceOutcomes && game.getCurrentPhase() == HeimlichAndCoPhase.DieRollPhase) {
+        if (simulateAllDiceOutcomes && game.getCurrentPhase() == HeimlichAndCoPhase.DIE_ROLL_PHASE) {
             possibleActions.remove(HeimlichAndCoDieRollAction.getRandomRollAction());
             selectedAction = possibleActions.toArray(new HeimlichAndCoAction[1])[(int)(possibleActions.size() * Math.random())];
         } else {

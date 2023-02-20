@@ -8,8 +8,13 @@ version '1.0'
 sourceCompatibility = 1.11
 
 //def agent_name = 'HeimlichAndCoRandomAgent'
-def agent_name = 'HeimlichAndCoDepthSearchAgent'
-//def agent_name = 'HeimlichAndCoMCTSAgent'
+//def agent_package = 'heimlich_and_co_random_agent'
+
+//def agent_name = 'HeimlichAndCoDepthSearchAgent'
+//def agent_package = 'heimlich_and_co_depth_search_agent'
+
+def agent_name = 'HeimlichAndCoMCTSAgent'
+def agent_package = 'heimlich_and_co_mcts_agent'
 
 repositories {
     mavenCentral()
@@ -29,9 +34,9 @@ test {
 jar {
     manifest {
         attributes 'Sge-Type': 'agent'
-        attributes 'Agent-Class': agent_name+'.'+agent_name
+        attributes 'Agent-Class': agent_package +'.'+agent_name
         attributes 'Agent-Name': agent_name
     }
     archivesBaseName = agent_name
-    includes = [agent_name+'/*']
+    includes = [agent_package +'/*']
 }
