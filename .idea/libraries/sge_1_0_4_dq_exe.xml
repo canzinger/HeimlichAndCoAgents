@@ -1,7 +1,7 @@
 <component name="libraryTable">
-  <library name="HeimlichAndCo-0.2.0">
+  <library name="sge-1.0.4-dq-exe">
     <CLASSES>
-      <root url="jar://$PROJECT_DIR$/libs/HeimlichAndCo-0.2.0.jar!/" />
+      <root url="jar://$PROJECT_DIR$/libs/sge-1.0.4-dq-exe.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES />

@@ -16,7 +16,7 @@ public class HeimlichAndCoRandomAgent extends AbstractGameAgent<HeimlichAndCo, H
 
     @Override
     public HeimlichAndCoAction computeNextAction(HeimlichAndCo heimlichAndCo, long l, TimeUnit timeUnit) {
-        super.log.inf("Selecting random action");
+        super.log.inf("Selecting random action\n");
         HeimlichAndCoAction[] actions = heimlichAndCo.getPossibleActions().toArray(new HeimlichAndCoAction[0]);
         return actions[super.random.nextInt(actions.length)];
     }

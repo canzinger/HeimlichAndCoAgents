@@ -23,8 +23,8 @@ repositories {
 dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
-    implementation files('libs/HeimlichAndCo-0.2.0.jar')
-    implementation files('libs/sge-1.0.2-exe.jar')
+    implementation files('libs/HeimlichAndCo-0.3.0.jar')
+    implementation files('libs/sge-1.0.4-dq-exe.jar')
 }
 
 test {

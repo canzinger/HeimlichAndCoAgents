@@ -92,7 +92,7 @@ public class HeimlichAndCoMCTSAgent extends AbstractGameAgent<HeimlichAndCo, Hei
      */
     private int mctsSimulation(MctsNode node) {
         log.deb("MctsAgent: In Simulation\n");
-        HeimlichAndCo game = node.getGame();
+        HeimlichAndCo game = new HeimlichAndCo(node.getGame());
         //use a termination depth were the game is evaluated and stopped
         int simulationDepth = 0;
         while(!game.isGameOver() && !this.shouldStopComputation()) {
