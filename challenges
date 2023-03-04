@@ -1,6 +1,0 @@
-Dealing with hidden information (which agent belongs to which player, also cards):
-    1. Provide information which agent plays which player(either random, or guess), ignore cards for now
-
-
-Dealing with non deterministic actions (rolling the die and drawing a card)
-
