@@ -22,18 +22,6 @@ public class MctsNode {
      * be chosen in the end.
      */
     private static int playerId;
-
-    private final Comparator<HeimlichAndCoAction> actionComparatorUct = Comparator.comparingDouble(this::calculateUCT);
-    private final Comparator<HeimlichAndCoAction> actionComparatorQsa = Comparator.comparingDouble(this::calculateQsaOfChild);
-
-    /**
-     * saves how many wins were achieved from this node
-     */
-    private int wins;
-    /**
-     * saves how many playouts were done from this node (or descendents of this node)
-     */
-    private int playouts;
     /**
      * the depth of this node; 0 for root node
      */
@@ -42,23 +30,26 @@ public class MctsNode {
      * the current game (state)
      */
     private final HeimlichAndCo game;
-
     /**
      * All resulting child states that have been explored at least once.
      * A child node is reached by taking (applying) the action that is used as the key.
      */
     private final Map<HeimlichAndCoAction, MctsNode> children;
-
     /**
      * parent of this node; null for root node
      */
     private final MctsNode parent;
-
     private final Random random;
-
-    public static void setPlayerId(int playerId) {
-        MctsNode.playerId = playerId;
-    }
+    /**
+     * saves how many wins were achieved from this node
+     */
+    private int wins;
+    /**
+     * saves how many playouts were done from this node (or descendents of this node)
+     */
+    private int playouts;
+    private final Comparator<HeimlichAndCoAction> actionComparatorUct = Comparator.comparingDouble(this::calculateUCT);
+    private final Comparator<HeimlichAndCoAction> actionComparatorQsa = Comparator.comparingDouble(this::calculateQsaOfChild);
 
     public MctsNode(int wins, int playouts, HeimlichAndCo game, MctsNode parent) {
         this(game, parent);
@@ -78,13 +69,72 @@ public class MctsNode {
         this.random = new Random();
     }
 
-    public HeimlichAndCo getGame() {
-        return new HeimlichAndCo(game);
+    public static void setPlayerId(int playerId) {
+        MctsNode.playerId = playerId;
+    }
+
+    /**
+     * Does backpropagation starting from the current node.
+     * Therefore, always increases playouts and increases wins depending on win.
+     *
+     * @param win indicating whether the game was won or not (1 on win, 0 on loss).
+     */
+    public void backpropagation(int win) {
+        if (win != 0 && win != 1) {
+            throw new IllegalArgumentException("Win must be either 1 or 0");
+        }
+        this.playouts++;
+        this.wins += win;
+        if (this.parent != null) {
+            this.parent.backpropagation(win);
+        }
+    }
+
+    /**
+     * Calculates the Q(s,a) of a state (i.e. current game state) and an action. This is the expected percentage of wins when taking action a in state s.
+     * Formula: #wins/ #playouts
+     * Therefore the best score that can be achieved is 1, the worst is 0.
+     * <p>
+     * Note: The action has to be contained in the children of this node.
+     *
+     * @param action for which to calculate the percentage
+     * @return expected percentage of wins when playing action in the current state
+     */
+    public double calculateQsaOfChild(HeimlichAndCoAction action) {
+        if (!this.children.containsKey(action)) {
+            throw new IllegalArgumentException("Action is not contained in children");
+        }
+        return ((double) children.get(action).wins) / children.get(action).playouts;
+    }
+
+    /**
+     * Expands the current node with the given action and returns the created node.
+     * Action must be null or a valid action that was not used for expansion with this node already.
+     * <p>
+     * When action is null, returns this node (useful for doing MCTS when dealing with terminal nodes).
+     *
+     * @param action to apply
+     * @return Game node that
+     */
+    public MctsNode expansion(HeimlichAndCoAction action) {
+        if (action == null) {
+            return this;
+        }
+        if (!game.isValidAction(action)) {
+            throw new IllegalArgumentException("The given action must be valid.");
+        }
+        if (this.children.containsKey(action)) {
+            throw new IllegalArgumentException("The current node was already expanded with the given action");
+        }
+        MctsNode newNode = new MctsNode(game.doAction(action), this);
+        this.children.put(action, newNode);
+        return newNode;
     }
 
     /**
      * selects a node with UCT strategy
      * during the first round checks all possible actions before selecting an action twice
+     *
      * @return this node and the selected action -> in the expansion phase the action can be taken from this node to get the new node
      */
     public Pair<MctsNode, HeimlichAndCoAction> selection(boolean simulateAllDiceOutcomes) {
@@ -109,47 +159,6 @@ public class MctsNode {
     }
 
     /**
-     * Expands the current node with the given action and returns the created node.
-     * Action must be null or a valid action that was not used for expansion with this node already.
-     *
-     * When action is null, returns this node (useful for doing MCTS when dealing with terminal nodes).
-     *
-     * @param action to apply
-     * @return Game node that
-     */
-    public MctsNode expansion(HeimlichAndCoAction action) {
-        if (action == null) {
-            return this;
-        }
-        if (!game.isValidAction(action)) {
-           throw new IllegalArgumentException("The given action must be valid.");
-        }
-        if (this.children.containsKey(action)) {
-            throw new IllegalArgumentException("The current node was already expanded with the given action");
-        }
-        MctsNode newNode = new MctsNode(game.doAction(action), this);
-        this.children.put(action, newNode);
-        return newNode;
-    }
-
-    /**
-     * Does backpropagation starting from the current node.
-     * Therefore, always increases playouts and increases wins depending on win.
-     *
-     * @param win indicating whether the game was won or not (1 on win, 0 on loss).
-     */
-    public void backpropagation(int win) {
-        if (win != 0 && win != 1) {
-            throw new IllegalArgumentException("Win must be either 1 or 0");
-        }
-        this.playouts++;
-        this.wins += win;
-        if (this.parent != null) {
-            this.parent.backpropagation(win);
-        }
-    }
-
-    /**
      * Selects the best action to take in the current node.
      * This means taking the best action according to Q(s,a).
      *
@@ -165,11 +174,23 @@ public class MctsNode {
         return new ImmutablePair<>(this.children.get(selectedAction), selectedAction);
     }
 
+    public HeimlichAndCo getGame() {
+        return new HeimlichAndCo(game);
+    }
+
+    public int getPlayouts() {
+        return this.playouts;
+    }
+
+    public int getWins() {
+        return this.wins;
+    }
+
     /**
      * Calculates the UCT score of an action.
      * In the case that no playout has been done yet for an action, the maximum Double value is returned. This is in line with exploring
      * each state/action at least once before exploring a state/action twice.
-     *
+     * <p>
      * Note: The action has to be a valid action in the current game state.
      *
      * @param action for which UCT score should be calculated
@@ -183,7 +204,7 @@ public class MctsNode {
             return Double.MAX_VALUE;
         }
 
-        if(this.children.containsKey(action)) {
+        if (this.children.containsKey(action)) {
             MctsNode child = this.children.get(action);
             if (child.playouts == 0 || this.playouts == 0) { //this should never happen
                 throw new IllegalStateException("Illegal 0 value in calculateUCT");
@@ -206,35 +227,17 @@ public class MctsNode {
     }
 
     /**
-     * Calculates the Q(s,a) of a state (i.e. current game state) and an action. This is the expected percentage of wins when taking action a in state s.
-     * Formula: #wins/ #playouts
-     * Therefore the best score that can be achieved is 1, the worst is 0.
-     *
-     * Note: The action has to be contained in the children of this node.
-     * @param action for which to calculate the percentage
-     * @return expected percentage of wins when playing action in the current state
-     */
-    public double calculateQsaOfChild(HeimlichAndCoAction action) {
-        if (!this.children.containsKey(action)) {
-            throw new IllegalArgumentException("Action is not contained in children");
-        }
-        return ((double)children.get(action).wins) / children.get(action).playouts;
-    }
-
-
-
-    /**
      * Gets the actions which have the maximum value according to some comparator. If multiple actions have the same
      * (maximum) value, all of them will be contained in the returned list.
      * This method runs in O(n) where n is the number of actions
      *
-     * @param actions possible actions in the current game state
+     * @param actions    possible actions in the current game state
      * @param comparator comparator which should be used to compare two actions (e.g. tree policy like UCT)
      * @return a List of actions which have the maximum value when compared with the given Comparator
      */
     private static List<HeimlichAndCoAction> getMaximumValuedActions(Set<HeimlichAndCoAction> actions, Comparator<HeimlichAndCoAction> comparator) {
         List<HeimlichAndCoAction> selectedActions = new LinkedList<>();
-        for(HeimlichAndCoAction action: actions) {
+        for (HeimlichAndCoAction action : actions) {
             if (selectedActions.isEmpty()) { //this is only true in the first iteration
                 selectedActions.add(action);
             } else if (comparator.compare(selectedActions.get(0), action) == 0) { //the current action is equal
@@ -247,11 +250,5 @@ public class MctsNode {
         }
         return selectedActions;
     }
-
-    public int getPlayouts() {
-        return this.playouts;
-    }
-
-    public int getWins() {return this.wins;}
 
 }

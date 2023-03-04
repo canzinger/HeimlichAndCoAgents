@@ -35,7 +35,7 @@ public class HeimlichAndCoDepthSearchAgent extends AbstractGameAgent<HeimlichAnd
         try {
             log.deb("Adding information to game\n");
             addInformationToGame(game);
-            log.deb("Creating and expanding Tree\n");
+            log.deb("Creating and expanding tree\n");
             DepthSearchNode.setTotalNodeCount(0);
             DepthSearchNode root = new DepthSearchNode(game, 0);
             root.expand(TERMINATION_DEPTH);
@@ -58,6 +58,7 @@ public class HeimlichAndCoDepthSearchAgent extends AbstractGameAgent<HeimlichAnd
      * Adds information that was removed by the game (i.e. hidden information).
      * Therefore, adds entries to the map which maps agents to players and entries to the map mapping the cards of players.
      * The agents are randomly assigned to players. And players are assumed to have no cards.
+     *
      * @param game
      */
     private void addInformationToGame(HeimlichAndCo game) {

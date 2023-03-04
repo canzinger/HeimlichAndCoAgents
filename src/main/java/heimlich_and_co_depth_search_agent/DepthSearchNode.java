@@ -13,23 +13,19 @@ public class DepthSearchNode {
      * For info/statistics purposes
      */
     private static int totalNodeCount;
-
+    /**
+     * the current game (state)
+     */
+    private final HeimlichAndCo game;
+    /**
+     * the depth of this node; 0 for root node
+     */
+    private final int depth;
     /**
      * Saves all children. The keys are the possible actions in the current game state and the values are the resulting
      * child nodes.
      */
     private Map<HeimlichAndCoAction, DepthSearchNode> children;
-
-    /**
-     * the current game (state)
-     */
-    private final HeimlichAndCo game;
-
-    /**
-     * the depth of this node; 0 for root node
-     */
-    private final int depth;
-
     /**
      * the score (in terms of the minimax algorithm) of this node
      */
@@ -42,12 +38,37 @@ public class DepthSearchNode {
         totalNodeCount++;
     }
 
+    public static int getTotalNodeCount() {
+        return totalNodeCount;
+    }
+
     public static void setTotalNodeCount(int totalNodeCount) {
         DepthSearchNode.totalNodeCount = totalNodeCount;
     }
 
-    public static int getTotalNodeCount() {
-        return totalNodeCount;
+    /**
+     * Calculates and sets the score for each node in the tree.
+     * Done by calculating the scores from the ground up (i.e. starting with the leaf nodes) until the root is reached.
+     *
+     * @param maximizingPlayer the playerId of the maximizing player (this should be the id of the AI agent playing)
+     */
+    public void evaluateTree(int maximizingPlayer) {
+        if (children.isEmpty()) {
+            this.score = evaluateGameState(maximizingPlayer);
+            return;
+        }
+
+        for (DepthSearchNode node : children.values()) {
+            node.evaluateTree(maximizingPlayer);
+        }
+
+        if (this.game.getCurrentPlayer() == maximizingPlayer) {
+            DepthSearchNode maxNode = Collections.max(children.values(), Comparator.comparingInt(node -> evaluateGameState(maximizingPlayer)));
+            this.score = maxNode.score;
+        } else {
+            DepthSearchNode minNode = Collections.min(children.values(), Comparator.comparingInt(node -> evaluateGameState(maximizingPlayer)));
+            this.score = minNode.score;
+        }
     }
 
     /**
@@ -64,42 +85,14 @@ public class DepthSearchNode {
             throw new IllegalStateException("Depth of node is too large.");
         }
         Set<HeimlichAndCoAction> possibleActions = game.getPossibleActions();
-        for(HeimlichAndCoAction action : possibleActions) {
+        for (HeimlichAndCoAction action : possibleActions) {
             DepthSearchNode newNode = new DepthSearchNode(game.doAction(action), this.depth + 1);
             this.children.put(action, newNode);
             newNode.expand(terminationDepth);
         }
     }
 
-    //sets the score of all nodes in the tree, starting with the leaf nodes
-
     /**
-     * Calculates and sets the score for each node in the tree.
-     * Done by calculating the scores from the ground up (i.e. starting with the leaf nodes) until the root is reached.
-     *
-     * @param maximizingPlayer the playerId of the maximizing player (this should be the id of the AI agent playing)
-     */
-    public void evaluateTree(int maximizingPlayer) {
-        if (children.isEmpty()) {
-            this.score = evaluateGameState(maximizingPlayer);
-            return;
-        }
-
-        for(DepthSearchNode node : children.values()) {
-            node.evaluateTree(maximizingPlayer);
-        }
-
-        if (this.game.getCurrentPlayer() == maximizingPlayer) {
-            DepthSearchNode maxNode = Collections.max(children.values(), Comparator.comparingInt(node -> evaluateGameState(maximizingPlayer)));
-            this.score = maxNode.score;
-        } else {
-            DepthSearchNode minNode = Collections.min(children.values(), Comparator.comparingInt(node -> evaluateGameState(maximizingPlayer)));
-            this.score = minNode.score;
-        }
-    }
-
-    /**
-     *
      * @return the best action to take in the current game state (i.e. the action with the highest score)
      */
     public HeimlichAndCoAction getMaxAction() {
@@ -108,8 +101,6 @@ public class DepthSearchNode {
         }
         return Collections.max(children.keySet(), Comparator.comparingInt(action -> children.get(action).score));
     }
-
-    //returned differenz von player agent zu bestem anderen agenten
 
     /**
      * Evaluates the current game, meaning finding a way to score a game state for a given player.
@@ -126,7 +117,7 @@ public class DepthSearchNode {
 
         //get the agent with the highest score that is not the agent of the given player
         int maxScore = Integer.MIN_VALUE;
-        for(Map.Entry<Agent, Integer> entry: scores.entrySet()) {
+        for (Map.Entry<Agent, Integer> entry : scores.entrySet()) {
             if (entry.getKey() == game.getPlayersToAgentsMap().get(maximizingPlayer)) {
                 continue;
             }
